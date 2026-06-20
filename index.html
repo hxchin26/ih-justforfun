@@ -108,6 +108,20 @@
         <div class="row"><button type="submit" class="btn">Post Cargo</button></div>
       </form>
 
+      <div class="dashboard card">
+        <h2>Available trucks dashboard</h2>
+        <p class="dashboard-copy">Filter by date or period to see available truck routes on the West Malaysia map.</p>
+        <div class="form grid-filter">
+          <div class="row"><label>From date<input type="date" id="map-start-date"></label></div>
+          <div class="row"><label>To date<input type="date" id="map-end-date"></label></div>
+          <div class="row"><button type="button" id="map-refresh" class="btn">Update Map</button></div>
+        </div>
+        <div class="map-shell">
+          <svg id="state-map" viewBox="0 0 420 520" aria-label="West Malaysia truck availability map"></svg>
+        </div>
+        <div id="map-list" class="map-list"></div>
+      </div>
+
       <div class="posts">
         <h2>Cargo Posts</h2>
         <div id="cargo-list" class="list"></div>

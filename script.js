@@ -22,6 +22,71 @@ function uid(prefix='id'){
   return prefix + '_' + Date.now() + '_' + Math.floor(Math.random()*10000)
 }
 
+const STATE_COORDS = {
+  Perlis:{x:60,y:40},
+  Kedah:{x:60,y:100},
+  Penang:{x:110,y:140},
+  Perak:{x:140,y:210},
+  Selangor:{x:190,y:280},
+  'Kuala Lumpur':{x:230,y:320},
+  Putrajaya:{x:260,y:350},
+  'Negeri Sembilan':{x:215,y:380},
+  Melaka:{x:205,y:430},
+  Johor:{x:205,y:500},
+  Pahang:{x:320,y:300},
+  Terengganu:{x:340,y:140},
+  Kelantan:{x:360,y:60}
+}
+
+const ROUTE_GRAPH = {
+  Perlis:['Kedah'],
+  Kedah:['Perlis','Penang'],
+  Penang:['Kedah','Perak'],
+  Perak:['Penang','Selangor'],
+  Selangor:['Perak','Kuala Lumpur'],
+  'Kuala Lumpur':['Selangor','Putrajaya','Negeri Sembilan','Pahang'],
+  Putrajaya:['Kuala Lumpur'],
+  'Negeri Sembilan':['Kuala Lumpur','Melaka'],
+  Melaka:['Negeri Sembilan','Johor'],
+  Johor:['Melaka'],
+  Pahang:['Kuala Lumpur','Terengganu','Kelantan'],
+  Terengganu:['Pahang','Kelantan'],
+  Kelantan:['Pahang','Terengganu']
+}
+
+function findRoutePath(from, to){
+  if(!ROUTE_GRAPH[from] || !ROUTE_GRAPH[to]) return []
+  const queue = [[from]]
+  const visited = new Set([from])
+  while(queue.length){
+    const path = queue.shift()
+    const node = path[path.length-1]
+    if(node === to) return path
+    for(const next of ROUTE_GRAPH[node]){
+      if(!visited.has(next)){
+        visited.add(next)
+        queue.push([...path, next])
+      }
+    }
+  }
+  return []
+}
+
+function routeContains(path, pickup, dropoff){
+  const i = path.indexOf(pickup)
+  const j = path.indexOf(dropoff)
+  return i >= 0 && j >= 0 && i < j
+}
+
+function routeStates(from, to){
+  const path = findRoutePath(from, to)
+  return path.length > 0 ? path : [from, to]
+}
+
+function routeString(from, to){
+  return routeStates(from, to).join(' → ')
+}
+
 // Render functions
 function renderTrucks(){
   const list = document.getElementById('truck-list')
@@ -59,19 +124,20 @@ function renderTrucks(){
   })
 }
 
+function routeMatches(cargo, truck){
+  const route = routeStates(truck.from, truck.to)
+  return routeContains(route, cargo.pickup, cargo.dropoff)
+}
+
 function findMatchesForCargo(cargo, trucks){
   return trucks.filter(t =>
-    clean(cargo.pickup) === clean(t.from) &&
-    clean(cargo.dropoff) === clean(t.to) &&
-    Number(cargo.weight) <= Number(t.capacity)
+    routeMatches(cargo, t)
   )
 }
 
 function findMatchesForTruck(truck, cargo){
   return cargo.filter(c =>
-    clean(c.pickup) === clean(truck.from) &&
-    clean(c.dropoff) === clean(truck.to) &&
-    Number(c.weight) <= Number(truck.capacity)
+    routeMatches(c, truck)
   )
 }
 
@@ -111,6 +177,115 @@ function renderCargo(){
   })
 }
 
+function inDateRange(date, start, end){
+  if(!date) return false
+  const value = new Date(date)
+  const fromDate = start ? new Date(start) : null
+  const toDate = end ? new Date(end) : null
+  if(fromDate && value < fromDate) return false
+  if(toDate && value > toDate) return false
+  return true
+}
+
+function renderStateMap(){
+  const svg = document.getElementById('state-map')
+  svg.innerHTML = ''
+  const ns = 'http://www.w3.org/2000/svg'
+  const baseGroup = document.createElementNS(ns, 'g')
+  baseGroup.setAttribute('id', 'base-map')
+  const drawn = new Set()
+  Object.entries(ROUTE_GRAPH).forEach(([from, neighbors]) => {
+    const fromPos = STATE_COORDS[from]
+    neighbors.forEach(neighbor => {
+      const key = [from, neighbor].sort().join('|')
+      if(drawn.has(key)) return
+      drawn.add(key)
+      const toPos = STATE_COORDS[neighbor]
+      if(!toPos) return
+      const line = document.createElementNS(ns, 'line')
+      line.setAttribute('x1', fromPos.x)
+      line.setAttribute('y1', fromPos.y)
+      line.setAttribute('x2', toPos.x)
+      line.setAttribute('y2', toPos.y)
+      line.setAttribute('stroke', '#dbeafe')
+      line.setAttribute('stroke-width', '2')
+      baseGroup.appendChild(line)
+    })
+  })
+  Object.entries(STATE_COORDS).forEach(([name, pos]) => {
+    const circle = document.createElementNS(ns, 'circle')
+    circle.setAttribute('cx', pos.x)
+    circle.setAttribute('cy', pos.y)
+    circle.setAttribute('r', '10')
+    circle.setAttribute('fill', '#eef2ff')
+    circle.setAttribute('stroke', '#93c5fd')
+    circle.setAttribute('stroke-width', '2')
+    baseGroup.appendChild(circle)
+    const label = document.createElementNS(ns, 'text')
+    label.setAttribute('x', pos.x + 14)
+    label.setAttribute('y', pos.y + 4)
+    label.setAttribute('font-size', '12')
+    label.setAttribute('fill', '#1f2937')
+    label.textContent = name
+    baseGroup.appendChild(label)
+  })
+  svg.appendChild(baseGroup)
+}
+
+function renderMapDashboard(){
+  const start = document.getElementById('map-start-date').value
+  const end = document.getElementById('map-end-date').value
+  const trucks = load(KEY_TRUCKS).filter(t => inDateRange(t.date, start, end))
+  const svg = document.getElementById('state-map')
+  const ns = 'http://www.w3.org/2000/svg'
+  let routeGroup = svg.querySelector('#truck-routes')
+  if(routeGroup){ routeGroup.remove() }
+  routeGroup = document.createElementNS(ns, 'g')
+  routeGroup.setAttribute('id', 'truck-routes')
+  trucks.forEach((truck, index) => {
+    const route = routeStates(truck.from, truck.to)
+    if(route.length < 2) return
+    const points = route.map(state => STATE_COORDS[state]).filter(Boolean).map(pos => `${pos.x},${pos.y}`).join(' ')
+    const polyline = document.createElementNS(ns, 'polyline')
+    polyline.setAttribute('points', points)
+    polyline.setAttribute('fill', 'none')
+    polyline.setAttribute('stroke', '#2563eb')
+    polyline.setAttribute('stroke-width', '4')
+    polyline.setAttribute('stroke-linecap', 'round')
+    polyline.setAttribute('stroke-linejoin', 'round')
+    polyline.setAttribute('opacity', '0.8')
+    routeGroup.appendChild(polyline)
+    const mid = STATE_COORDS[route[Math.floor(route.length / 2)]]
+    if(mid){
+      const text = document.createElementNS(ns, 'text')
+      text.setAttribute('x', mid.x + 2)
+      text.setAttribute('y', mid.y - 8)
+      text.setAttribute('font-size', '10')
+      text.setAttribute('fill', '#2563eb')
+      text.textContent = truck.company
+      routeGroup.appendChild(text)
+    }
+  })
+  svg.appendChild(routeGroup)
+  const list = document.getElementById('map-list')
+  list.innerHTML = ''
+  if(trucks.length === 0){
+    list.innerHTML = '<div class="map-item">No trucks available for this date range.</div>'
+    return
+  }
+  trucks.forEach(truck => {
+    const item = document.createElement('div')
+    item.className = 'map-item'
+    item.innerHTML = `
+      <strong>${escapeHtml(truck.company)} — ${escapeHtml(truck.truckType)}</strong>
+      <div class="meta">${escapeHtml(routeString(truck.from, truck.to))}</div>
+      <div class="meta">Date: ${escapeHtml(truck.date)} • Capacity: ${truck.capacity} kg</div>
+      <div class="meta">Price: RM ${truck.price}</div>
+    `
+    list.appendChild(item)
+  })
+}
+
 // Utility: normalize text for matching
 function clean(s){
   return String(s||'').trim().toLowerCase()
@@ -132,17 +307,23 @@ function handleDelete(id, type){
     let arr = load(KEY_TRUCKS)
     arr = arr.filter(x => x.id !== id)
     save(KEY_TRUCKS, arr)
-    renderTrucks(); renderCargo()
+    renderTrucks(); renderCargo(); renderMapDashboard()
   }else{
     let arr = load(KEY_CARGO)
     arr = arr.filter(x => x.id !== id)
     save(KEY_CARGO, arr)
-    renderCargo()
+    renderCargo(); renderTrucks(); renderMapDashboard()
   }
 }
 
 // Wire up forms
 function init(){
+  const today = new Date().toISOString().slice(0,10)
+  const startDateInput = document.getElementById('map-start-date')
+  const endDateInput = document.getElementById('map-end-date')
+  startDateInput.value = today
+  endDateInput.value = today
+
   // Tabs
   document.querySelectorAll('.tab').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -174,6 +355,7 @@ function init(){
     f.reset()
     renderTrucks()
     renderCargo()
+    renderMapDashboard()
   })
 
   // Cargo form submit
@@ -197,6 +379,13 @@ function init(){
     renderCargo()
   })
 
+  document.getElementById('map-refresh').addEventListener('click', () => {
+    renderMapDashboard()
+  })
+
+  startDateInput.addEventListener('change', renderMapDashboard)
+  endDateInput.addEventListener('change', renderMapDashboard)
+
   // Delegate delete buttons
   document.body.addEventListener('click', e => {
     if(e.target.classList.contains('delete')){
@@ -207,7 +396,7 @@ function init(){
   })
 
   // Initial render
-  renderTrucks(); renderCargo()
+  renderTrucks(); renderCargo(); renderStateMap(); renderMapDashboard()
 }
 
 // Start when DOM ready
