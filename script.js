@@ -87,6 +87,20 @@ function routeString(from, to){
   return routeStates(from, to).join(' → ')
 }
 
+function smoothRoutePath(fromPos, toPos){
+  const dx = toPos.x - fromPos.x
+  const dy = toPos.y - fromPos.y
+  const mx = (fromPos.x + toPos.x) / 2
+  const my = (fromPos.y + toPos.y) / 2
+  const offset = Math.min(22, Math.hypot(dx, dy) / 4)
+  const perpX = -dy
+  const perpY = dx
+  const norm = Math.hypot(perpX, perpY) || 1
+  const cx = mx + (perpX / norm) * offset
+  const cy = my + (perpY / norm) * offset
+  return `M${fromPos.x},${fromPos.y} Q${cx},${cy} ${toPos.x},${toPos.y}`
+}
+
 // Render functions
 function renderTrucks(){
   const list = document.getElementById('truck-list')
@@ -216,15 +230,15 @@ function renderStateMap(){
       drawn.add(key)
       const toPos = STATE_COORDS[neighbor]
       if(!toPos) return
-      const line = document.createElementNS(ns, 'line')
-      line.setAttribute('x1', fromPos.x)
-      line.setAttribute('y1', fromPos.y)
-      line.setAttribute('x2', toPos.x)
-      line.setAttribute('y2', toPos.y)
-      line.setAttribute('stroke', '#93c5fd')
-      line.setAttribute('stroke-width', '3')
-      line.setAttribute('opacity', '0.7')
-      baseGroup.appendChild(line)
+      const path = document.createElementNS(ns, 'path')
+      path.setAttribute('d', smoothRoutePath(fromPos, toPos))
+      path.setAttribute('fill', 'none')
+      path.setAttribute('stroke', '#93c5fd')
+      path.setAttribute('stroke-width', '3')
+      path.setAttribute('stroke-linecap', 'round')
+      path.setAttribute('stroke-linejoin', 'round')
+      path.setAttribute('opacity', '0.55')
+      baseGroup.appendChild(path)
     })
   })
   Object.entries(STATE_COORDS).forEach(([name, pos]) => {

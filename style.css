@@ -35,10 +35,11 @@ select{appearance:none}
 .dashboard{margin:20px 0;padding:18px}
 .dashboard-copy{margin:0 0 14px;color:var(--muted);font-size:14px}
 .grid-filter{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px}
-.map-shell{background:radial-gradient(circle at top,#eef4ff,#f7f9fc 38%,#ffffff 100%);border-radius:18px;padding:16px;box-shadow:inset 0 0 0 1px rgba(102,126,234,0.08)}
-#state-map{width:100%;height:360px;display:block;border-radius:14px;background:#f8fbff}
+.map-shell{position:relative;overflow:hidden;background:linear-gradient(180deg,#eef5ff 0%,#f7f9fc 48%,#ffffff 100%);border-radius:18px;padding:22px;box-shadow:0 24px 70px rgba(15,23,42,0.08)}
+.map-shell::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 18% 30%,rgba(59,130,246,0.18),transparent 24%),radial-gradient(circle at 80% 32%,rgba(14,165,233,0.12),transparent 18%);pointer-events:none}
+#state-map{width:100%;height:360px;display:block;border-radius:18px;background:transparent;position:relative;z-index:1}
 .svg-text{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
-.route-line{opacity:0;transition:opacity 0.2s ease}
+.route-line{opacity:0;transition:opacity 0.2s ease;stroke-linecap:round;stroke-linejoin:round}
 .route-line.active{opacity:1;stroke-dasharray:12 8;animation:flow 1.5s linear infinite;marker-end:url(#arrowhead)}
 .route-label{opacity:0;transition:opacity 0.2s ease}
 .route-label.active{opacity:1}
