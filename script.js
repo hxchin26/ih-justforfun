@@ -41,52 +41,47 @@ function renderTrucks(){
   })
 }
 
+function findMatchesForCargo(cargo, trucks){
+  return trucks.filter(t =>
+    clean(cargo.pickup) === clean(t.from) &&
+    clean(cargo.dropoff) === clean(t.to) &&
+    Number(cargo.weight) <= Number(t.capacity)
+  )
+}
+
 function renderCargo(){
   const list = document.getElementById('cargo-list')
   list.innerHTML = ''
   const cargo = load(KEY_CARGO)
+  const trucks = load(KEY_TRUCKS)
   if(cargo.length===0){ list.innerHTML = '<div class="meta">No cargo posts yet.</div>'; return }
   cargo.forEach(c => {
+    const matches = findMatchesForCargo(c, trucks)
     const card = document.createElement('div')
     card.className = 'card'
+    let matchesHtml = ''
+    if(matches.length > 0){
+      matchesHtml = '<div class="match-list">'
+      matches.forEach(t => {
+        matchesHtml += `
+          <div class="match-item">
+            <strong>${escapeHtml(t.company)} • ${escapeHtml(t.truckType)}</strong>
+            <div class="meta">${escapeHtml(t.from)} → ${escapeHtml(t.to)} • ${escapeHtml(t.date)}</div>
+            <div class="meta">Capacity: ${t.capacity} kg • Price: RM ${t.price}</div>
+          </div>`
+      })
+      matchesHtml += '</div>'
+    } else {
+      matchesHtml = '<div class="no-match">No trucks match this cargo request yet.</div>'
+    }
     card.innerHTML = `
       <h3>${escapeHtml(c.company)} — ${escapeHtml(c.cargoType)}</h3>
       <div class="meta">${escapeHtml(c.pickup)} → ${escapeHtml(c.dropoff)} • ${escapeHtml(c.date)}</div>
       <div class="meta">Weight: ${c.weight} kg • Budget: RM ${c.budget}</div>
       <div class="actions"><button class="delete" data-id="${c.id}" data-type="cargo">Delete</button></div>
+      ${matchesHtml}
     `
     list.appendChild(card)
-  })
-}
-
-// Render match suggestions based on simple rules
-function renderMatches(){
-  const out = document.getElementById('matches-list')
-  out.innerHTML = ''
-  const trucks = load(KEY_TRUCKS)
-  const cargo = load(KEY_CARGO)
-  const matches = []
-
-  cargo.forEach(c => {
-    trucks.forEach(t => {
-      // match if pickup==from, dropoff==to, and weight <= capacity
-      if(clean(c.pickup) === clean(t.from) && clean(c.dropoff) === clean(t.to) && Number(c.weight) <= Number(t.capacity)){
-        matches.push({truck: t, cargo: c})
-      }
-    })
-  })
-
-  if(matches.length===0){ out.innerHTML = '<div class="meta">No matches found yet.</div>'; return }
-
-  matches.forEach(m => {
-    const card = document.createElement('div')
-    card.className = 'card match-card'
-    card.innerHTML = `
-      <h3>Match: ${escapeHtml(m.cargo.company)} ↔ ${escapeHtml(m.truck.company)}</h3>
-      <div class="meta">${escapeHtml(m.cargo.pickup)} → ${escapeHtml(m.cargo.dropoff)} • ${escapeHtml(m.cargo.date)}</div>
-      <div class="meta">Cargo ${m.cargo.weight}kg — Truck capacity ${m.truck.capacity}kg</div>
-    `
-    out.appendChild(card)
   })
 }
 
@@ -111,12 +106,12 @@ function handleDelete(id, type){
     let arr = load(KEY_TRUCKS)
     arr = arr.filter(x => x.id !== id)
     save(KEY_TRUCKS, arr)
-    renderTrucks(); renderMatches()
+    renderTrucks(); renderCargo()
   }else{
     let arr = load(KEY_CARGO)
     arr = arr.filter(x => x.id !== id)
     save(KEY_CARGO, arr)
-    renderCargo(); renderMatches()
+    renderCargo()
   }
 }
 
@@ -152,7 +147,7 @@ function init(){
     save(KEY_TRUCKS, arr)
     f.reset()
     renderTrucks()
-    renderMatches()
+    renderCargo()
   })
 
   // Cargo form submit
@@ -174,7 +169,6 @@ function init(){
     save(KEY_CARGO, arr)
     f.reset()
     renderCargo()
-    renderMatches()
   })
 
   // Delegate delete buttons
@@ -187,7 +181,7 @@ function init(){
   })
 
   // Initial render
-  renderTrucks(); renderCargo(); renderMatches()
+  renderTrucks(); renderCargo()
 }
 
 // Start when DOM ready

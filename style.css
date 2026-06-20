@@ -26,8 +26,11 @@ input{margin-top:6px;padding:10px;border-radius:8px;border:1px solid #e6e9ef;bac
 .meta{font-size:13px;color:var(--muted);margin-bottom:8px}
 .card .actions{display:flex;gap:8px;justify-content:flex-end}
 .delete{background:#fee2e2;color:#b91c1c;border:0;padding:6px 10px;border-radius:8px;cursor:pointer}
-.match-card{border-left:4px solid #10b981}
-.matches{margin-top:22px}
+.match-list{margin-top:16px;padding-top:12px;border-top:1px solid #e6e9ef}
+.match-item{background:#f7f9fc;border-radius:8px;padding:10px;margin-top:10px}
+.match-item:first-child{margin-top:0}
+.match-item strong{display:block;margin-bottom:4px}
+.no-match{font-size:13px;color:#9ca3af;margin-top:12px}
 .footer{text-align:center;padding:16px;color:var(--muted);font-size:13px}
 .hidden{display:none}
 
