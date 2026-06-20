@@ -21,8 +21,38 @@
     <section class="panel" id="truck-panel">
       <form id="truck-form" class="form">
         <div class="row"><label>Company name<input name="company" required></label></div>
-        <div class="row"><label>From location<input name="from" required></label></div>
-        <div class="row"><label>To location<input name="to" required></label></div>
+        <div class="row"><label>From location<select name="from" required>
+          <option value="">Choose state</option>
+          <option>Perlis</option>
+          <option>Kedah</option>
+          <option>Penang</option>
+          <option>Perak</option>
+          <option>Selangor</option>
+          <option>Kuala Lumpur</option>
+          <option>Putrajaya</option>
+          <option>Negeri Sembilan</option>
+          <option>Melaka</option>
+          <option>Johor</option>
+          <option>Pahang</option>
+          <option>Terengganu</option>
+          <option>Kelantan</option>
+        </select></label></div>
+        <div class="row"><label>To location<select name="to" required>
+          <option value="">Choose state</option>
+          <option>Perlis</option>
+          <option>Kedah</option>
+          <option>Penang</option>
+          <option>Perak</option>
+          <option>Selangor</option>
+          <option>Kuala Lumpur</option>
+          <option>Putrajaya</option>
+          <option>Negeri Sembilan</option>
+          <option>Melaka</option>
+          <option>Johor</option>
+          <option>Pahang</option>
+          <option>Terengganu</option>
+          <option>Kelantan</option>
+        </select></label></div>
         <div class="row"><label>Date<input type="date" name="date" required></label></div>
         <div class="row"><label>Truck type<input name="truckType" placeholder="e.g., 10ft van" required></label></div>
         <div class="row"><label>Available capacity (kg)<input type="number" name="capacity" min="0" required></label></div>
@@ -39,8 +69,38 @@
     <section class="panel hidden" id="cargo-panel">
       <form id="cargo-form" class="form">
         <div class="row"><label>Company name<input name="company" required></label></div>
-        <div class="row"><label>Pickup location<input name="pickup" required></label></div>
-        <div class="row"><label>Dropoff location<input name="dropoff" required></label></div>
+        <div class="row"><label>Pickup location<select name="pickup" required>
+          <option value="">Choose state</option>
+          <option>Perlis</option>
+          <option>Kedah</option>
+          <option>Penang</option>
+          <option>Perak</option>
+          <option>Selangor</option>
+          <option>Kuala Lumpur</option>
+          <option>Putrajaya</option>
+          <option>Negeri Sembilan</option>
+          <option>Melaka</option>
+          <option>Johor</option>
+          <option>Pahang</option>
+          <option>Terengganu</option>
+          <option>Kelantan</option>
+        </select></label></div>
+        <div class="row"><label>Dropoff location<select name="dropoff" required>
+          <option value="">Choose state</option>
+          <option>Perlis</option>
+          <option>Kedah</option>
+          <option>Penang</option>
+          <option>Perak</option>
+          <option>Selangor</option>
+          <option>Kuala Lumpur</option>
+          <option>Putrajaya</option>
+          <option>Negeri Sembilan</option>
+          <option>Melaka</option>
+          <option>Johor</option>
+          <option>Pahang</option>
+          <option>Terengganu</option>
+          <option>Kelantan</option>
+        </select></label></div>
         <div class="row"><label>Date<input type="date" name="date" required></label></div>
         <div class="row"><label>Cargo weight (kg)<input type="number" name="weight" min="0" required></label></div>
         <div class="row"><label>Cargo type<input name="cargoType" placeholder="e.g., electronics" required></label></div>

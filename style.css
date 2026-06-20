@@ -17,7 +17,8 @@ body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica
 .form{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:20px}
 .row{display:flex;flex-direction:column}
 label{font-size:13px;color:var(--muted)}
-input{margin-top:6px;padding:10px;border-radius:8px;border:1px solid #e6e9ef;background:var(--card)}
+input, select{margin-top:6px;padding:10px;border-radius:8px;border:1px solid #e6e9ef;background:var(--card);font:inherit}
+select{appearance:none}
 .btn{grid-column:1/-1;padding:10px 14px;border-radius:8px;border:0;background:var(--accent);color:#fff;cursor:pointer}
 .posts{margin-top:8px}
 .list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
