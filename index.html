@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CargoLink</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <h1>CargoLink</h1>
+    <p class="subtitle">Simple hackathon demo — match trucks with cargo</p>
+  </header>
+
+  <main class="main">
+    <div class="tabs">
+      <button class="tab active" data-tab="truck">Post Truck Availability</button>
+      <button class="tab" data-tab="cargo">Post Cargo Request</button>
+    </div>
+
+    <section class="panel" id="truck-panel">
+      <form id="truck-form" class="form">
+        <div class="row"><label>Company name<input name="company" required></label></div>
+        <div class="row"><label>From location<input name="from" required></label></div>
+        <div class="row"><label>To location<input name="to" required></label></div>
+        <div class="row"><label>Date<input type="date" name="date" required></label></div>
+        <div class="row"><label>Truck type<input name="truckType" placeholder="e.g., 10ft van" required></label></div>
+        <div class="row"><label>Available capacity (kg)<input type="number" name="capacity" min="0" required></label></div>
+        <div class="row"><label>Price expectation (RM)<input type="number" name="price" min="0" step="0.01" required></label></div>
+        <div class="row"><button type="submit" class="btn">Post Truck</button></div>
+      </form>
+
+      <div class="posts">
+        <h2>Truck Posts</h2>
+        <div id="truck-list" class="list"></div>
+      </div>
+    </section>
+
+    <section class="panel hidden" id="cargo-panel">
+      <form id="cargo-form" class="form">
+        <div class="row"><label>Company name<input name="company" required></label></div>
+        <div class="row"><label>Pickup location<input name="pickup" required></label></div>
+        <div class="row"><label>Dropoff location<input name="dropoff" required></label></div>
+        <div class="row"><label>Date<input type="date" name="date" required></label></div>
+        <div class="row"><label>Cargo weight (kg)<input type="number" name="weight" min="0" required></label></div>
+        <div class="row"><label>Cargo type<input name="cargoType" placeholder="e.g., electronics" required></label></div>
+        <div class="row"><label>Budget (RM)<input type="number" name="budget" min="0" step="0.01" required></label></div>
+        <div class="row"><button type="submit" class="btn">Post Cargo</button></div>
+      </form>
+
+      <div class="posts">
+        <h2>Cargo Posts</h2>
+        <div id="cargo-list" class="list"></div>
+      </div>
+    </section>
+
+    <section class="matches">
+      <h2>Match Suggestions</h2>
+      <div id="matches-list" class="list"></div>
+    </section>
+
+  </main>
+
+  <footer class="footer">Made with ❤️ for ImagineHack 2026</footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
