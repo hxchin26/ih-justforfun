@@ -27,15 +27,33 @@ function renderTrucks(){
   const list = document.getElementById('truck-list')
   list.innerHTML = ''
   const trucks = load(KEY_TRUCKS)
+  const cargo = load(KEY_CARGO)
   if(trucks.length===0){ list.innerHTML = '<div class="meta">No truck posts yet.</div>'; return }
   trucks.forEach(t => {
+    const matches = findMatchesForTruck(t, cargo)
     const card = document.createElement('div')
     card.className = 'card'
+    let matchesHtml = ''
+    if(matches.length > 0){
+      matchesHtml = '<div class="match-list">'
+      matches.forEach(c => {
+        matchesHtml += `
+          <div class="match-item">
+            <strong>${escapeHtml(c.company)} • ${escapeHtml(c.cargoType)}</strong>
+            <div class="meta">${escapeHtml(c.pickup)} → ${escapeHtml(c.dropoff)} • ${escapeHtml(c.date)}</div>
+            <div class="meta">Weight: ${c.weight} kg • Budget: RM ${c.budget}</div>
+          </div>`
+      })
+      matchesHtml += '</div>'
+    } else {
+      matchesHtml = '<div class="no-match">No cargo requests match this truck yet.</div>'
+    }
     card.innerHTML = `
       <h3>${escapeHtml(t.company)} — ${escapeHtml(t.truckType)}</h3>
       <div class="meta">${escapeHtml(t.from)} → ${escapeHtml(t.to)} • ${escapeHtml(t.date)}</div>
       <div class="meta">Capacity: ${t.capacity} kg • Price: RM ${t.price}</div>
       <div class="actions"><button class="delete" data-id="${t.id}" data-type="truck">Delete</button></div>
+      ${matchesHtml}
     `
     list.appendChild(card)
   })
@@ -46,6 +64,14 @@ function findMatchesForCargo(cargo, trucks){
     clean(cargo.pickup) === clean(t.from) &&
     clean(cargo.dropoff) === clean(t.to) &&
     Number(cargo.weight) <= Number(t.capacity)
+  )
+}
+
+function findMatchesForTruck(truck, cargo){
+  return cargo.filter(c =>
+    clean(c.pickup) === clean(truck.from) &&
+    clean(c.dropoff) === clean(truck.to) &&
+    Number(c.weight) <= Number(truck.capacity)
   )
 }
 
