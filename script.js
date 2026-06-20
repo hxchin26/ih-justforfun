@@ -207,8 +207,9 @@ function renderStateMap(){
       line.setAttribute('y1', fromPos.y)
       line.setAttribute('x2', toPos.x)
       line.setAttribute('y2', toPos.y)
-      line.setAttribute('stroke', '#dbeafe')
-      line.setAttribute('stroke-width', '2')
+      line.setAttribute('stroke', '#93c5fd')
+      line.setAttribute('stroke-width', '3')
+      line.setAttribute('opacity', '0.7')
       baseGroup.appendChild(line)
     })
   })
@@ -216,16 +217,17 @@ function renderStateMap(){
     const circle = document.createElementNS(ns, 'circle')
     circle.setAttribute('cx', pos.x)
     circle.setAttribute('cy', pos.y)
-    circle.setAttribute('r', '10')
-    circle.setAttribute('fill', '#eef2ff')
-    circle.setAttribute('stroke', '#93c5fd')
+    circle.setAttribute('r', '11')
+    circle.setAttribute('fill', '#dbeafe')
+    circle.setAttribute('stroke', '#3b82f6')
     circle.setAttribute('stroke-width', '2')
     baseGroup.appendChild(circle)
     const label = document.createElementNS(ns, 'text')
     label.setAttribute('x', pos.x + 14)
-    label.setAttribute('y', pos.y + 4)
-    label.setAttribute('font-size', '12')
+    label.setAttribute('y', pos.y + 5)
+    label.setAttribute('font-size', '11')
     label.setAttribute('fill', '#1f2937')
+    label.setAttribute('class', 'svg-text')
     label.textContent = name
     baseGroup.appendChild(label)
   })
@@ -270,6 +272,16 @@ function renderMapDashboard(){
   const list = document.getElementById('map-list')
   list.innerHTML = ''
   if(trucks.length === 0){
+    const emptyText = document.createElementNS(ns, 'text')
+    emptyText.setAttribute('x', 210)
+    emptyText.setAttribute('y', 190)
+    emptyText.setAttribute('font-size', '18')
+    emptyText.setAttribute('fill', '#475569')
+    emptyText.setAttribute('text-anchor', 'middle')
+    emptyText.setAttribute('class', 'svg-text')
+    emptyText.textContent = 'No trucks available for this date range.'
+    routeGroup.appendChild(emptyText)
+    svg.appendChild(routeGroup)
     list.innerHTML = '<div class="map-item">No trucks available for this date range.</div>'
     return
   }
