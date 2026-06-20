@@ -191,6 +191,20 @@ function renderStateMap(){
   const svg = document.getElementById('state-map')
   svg.innerHTML = ''
   const ns = 'http://www.w3.org/2000/svg'
+  const defs = document.createElementNS(ns, 'defs')
+  const marker = document.createElementNS(ns, 'marker')
+  marker.setAttribute('id', 'arrowhead')
+  marker.setAttribute('markerWidth', '10')
+  marker.setAttribute('markerHeight', '10')
+  marker.setAttribute('refX', '0')
+  marker.setAttribute('refY', '3')
+  marker.setAttribute('orient', 'auto')
+  const arrowPath = document.createElementNS(ns, 'path')
+  arrowPath.setAttribute('d', 'M0,0 L0,6 L9,3 z')
+  arrowPath.setAttribute('fill', '#2563eb')
+  marker.appendChild(arrowPath)
+  defs.appendChild(marker)
+  svg.appendChild(defs)
   const baseGroup = document.createElementNS(ns, 'g')
   baseGroup.setAttribute('id', 'base-map')
   const drawn = new Set()
@@ -243,9 +257,7 @@ function renderMapDashboard(){
   svg.innerHTML = ''
   renderStateMap()
 
-  let routeGroup = svg.querySelector('#truck-routes')
-  if(routeGroup){ routeGroup.remove() }
-  routeGroup = document.createElementNS(ns, 'g')
+  const routeGroup = document.createElementNS(ns, 'g')
   routeGroup.setAttribute('id', 'truck-routes')
   trucks.forEach((truck, index) => {
     const route = routeStates(truck.from, truck.to)
@@ -258,7 +270,8 @@ function renderMapDashboard(){
     polyline.setAttribute('stroke-width', '5')
     polyline.setAttribute('stroke-linecap', 'round')
     polyline.setAttribute('stroke-linejoin', 'round')
-    polyline.setAttribute('opacity', '0.9')
+    polyline.setAttribute('class', 'route-line')
+    polyline.setAttribute('data-route-id', truck.id)
     routeGroup.appendChild(polyline)
     const mid = STATE_COORDS[route[Math.floor(route.length / 2)]]
     if(mid){
@@ -267,7 +280,8 @@ function renderMapDashboard(){
       text.setAttribute('y', mid.y - 8)
       text.setAttribute('font-size', '10')
       text.setAttribute('fill', '#2563eb')
-      text.setAttribute('class', 'svg-text')
+      text.setAttribute('class', 'svg-text route-label')
+      text.setAttribute('data-route-id', truck.id)
       text.textContent = truck.company
       routeGroup.appendChild(text)
     }
@@ -291,13 +305,54 @@ function renderMapDashboard(){
   }
   trucks.forEach(truck => {
     const item = document.createElement('div')
-    item.className = 'map-item'
+    item.className = 'map-item map-item-hover'
+    item.dataset.routeId = truck.id
     item.innerHTML = `
       <strong>${escapeHtml(truck.company)} — ${escapeHtml(truck.truckType)}</strong>
       <div class="meta">${escapeHtml(routeString(truck.from, truck.to))}</div>
       <div class="meta">Date: ${escapeHtml(truck.date)} • Capacity: ${truck.capacity} kg</div>
       <div class="meta">Price: RM ${truck.price}</div>
+      <div class="meta">Hover to highlight route</div>
     `
+    item.addEventListener('mouseenter', () => {
+      if(item.classList.contains('map-item-selected')) return
+      const line = svg.querySelector(`.route-line[data-route-id="${truck.id}"]`)
+      const label = svg.querySelector(`.route-label[data-route-id="${truck.id}"]`)
+      if(line){ line.classList.add('active') }
+      if(label){ label.classList.add('active') }
+    })
+    item.addEventListener('mouseleave', () => {
+      if(item.classList.contains('map-item-selected')) return
+      const line = svg.querySelector(`.route-line[data-route-id="${truck.id}"]`)
+      const label = svg.querySelector(`.route-label[data-route-id="${truck.id}"]`)
+      if(line){ line.classList.remove('active') }
+      if(label){ label.classList.remove('active') }
+    })
+    item.addEventListener('click', () => {
+      const activeLine = svg.querySelector(`.route-line.active`)
+      const activeLabel = svg.querySelector(`.route-label.active`)
+      const activeItem = document.querySelector('.map-item-selected')
+      if(activeItem && activeItem !== item){
+        activeItem.classList.remove('map-item-selected')
+      }
+      if(activeLine && activeLine.dataset.routeId !== truck.id){
+        activeLine.classList.remove('active')
+      }
+      if(activeLabel && activeLabel.dataset.routeId !== truck.id){
+        activeLabel.classList.remove('active')
+      }
+      const line = svg.querySelector(`.route-line[data-route-id="${truck.id}"]`)
+      const label = svg.querySelector(`.route-label[data-route-id="${truck.id}"]`)
+      const isSelected = item.classList.toggle('map-item-selected')
+      if(line){
+        if(isSelected) line.classList.add('active')
+        else line.classList.remove('active')
+      }
+      if(label){
+        if(isSelected) label.classList.add('active')
+        else label.classList.remove('active')
+      }
+    })
     list.appendChild(item)
   })
 }
