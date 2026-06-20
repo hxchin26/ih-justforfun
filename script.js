@@ -240,6 +240,9 @@ function renderMapDashboard(){
   const trucks = load(KEY_TRUCKS).filter(t => inDateRange(t.date, start, end))
   const svg = document.getElementById('state-map')
   const ns = 'http://www.w3.org/2000/svg'
+  svg.innerHTML = ''
+  renderStateMap()
+
   let routeGroup = svg.querySelector('#truck-routes')
   if(routeGroup){ routeGroup.remove() }
   routeGroup = document.createElementNS(ns, 'g')
@@ -252,10 +255,10 @@ function renderMapDashboard(){
     polyline.setAttribute('points', points)
     polyline.setAttribute('fill', 'none')
     polyline.setAttribute('stroke', '#2563eb')
-    polyline.setAttribute('stroke-width', '4')
+    polyline.setAttribute('stroke-width', '5')
     polyline.setAttribute('stroke-linecap', 'round')
     polyline.setAttribute('stroke-linejoin', 'round')
-    polyline.setAttribute('opacity', '0.8')
+    polyline.setAttribute('opacity', '0.9')
     routeGroup.appendChild(polyline)
     const mid = STATE_COORDS[route[Math.floor(route.length / 2)]]
     if(mid){
@@ -264,6 +267,7 @@ function renderMapDashboard(){
       text.setAttribute('y', mid.y - 8)
       text.setAttribute('font-size', '10')
       text.setAttribute('fill', '#2563eb')
+      text.setAttribute('class', 'svg-text')
       text.textContent = truck.company
       routeGroup.appendChild(text)
     }
